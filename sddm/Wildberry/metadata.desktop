@@ -1,0 +1,16 @@
+[SddmGreeterTheme]
+Name=Wildberry
+Description=Wildberry for SDDM
+Author=Miguel Beltrán
+Copyright=Copyright (C) 2023 Miguel Beltrán
+License=GPL-3.0-or-later
+Type=sddm-theme
+Version=1.6
+Website=https://www.novaflowos.com
+Screenshot=Previews/preview.jpg
+MainScript=Main.qml
+ConfigFile=theme.conf
+TranslationsDirectory=translations
+Email=hopeandtruth6517@gmail.com
+Theme-Id=wildberry
+Theme-API=2.11
