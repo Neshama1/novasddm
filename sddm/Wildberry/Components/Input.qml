@@ -180,6 +180,7 @@ Column {
 
         TextField {
             id: username
+            padding: 0
             text: config.ForceLastUser == "true" ? selectUser.currentText : null
             font.capitalization: config.AllowBadUsernames == "false" ? Font.Capitalize : Font.MixedCase
             anchors.centerIn: parent
