@@ -1,0 +1,16 @@
+[SddmGreeterTheme]
+Name=Fresh
+Description=Fresh for SDDM
+Author=Miguel Beltrán
+Copyright=Copyright (C) 2023 Miguel Beltrán
+License=CC-BY-SA-4.0
+Type=sddm-theme
+Version=1.6
+Website=https://www.novaflowos.com
+Screenshot=Previews/preview.png
+MainScript=Main.qml
+ConfigFile=theme.conf
+TranslationsDirectory=translations
+Email=hopeandtruth6517@gmail.com
+Theme-Id=fresh
+Theme-API=2.11
