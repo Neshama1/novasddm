@@ -22,253 +22,220 @@
 // along with SDDM Sugar Candy. If not, see <https://www.gnu.org/licenses/>
 //
 
-import QtQuick 2.11
-import QtQuick.Layouts 1.11
-import QtQuick.Controls 2.4
-import QtGraphicalEffects 1.0
+import QtQml
+import QtQuick
+import QtQuick.Layouts
+import QtQuick.Controls
+import QtQuick.Effects
+import QtQuick.VirtualKeyboard
+import SddmComponents as SDDM
+import QtQml.Models
+import org.kde.kirigami
+import org.kde.kirigami.primitives
+import org.kde.kirigami.layouts
+import org.kde.kirigami.platform
 import "Components"
 
-Pane {
+Page {
     id: root
 
-    height: config.ScreenHeight || Screen.height
-    width: config.ScreenWidth || Screen.ScreenWidth
+	property color backColor: "black"
+	property color bannerColor: "#737373"
+	property int bannerWidth: 42
+	property string user
+	property string password
+	property int sessionIndex
+
+	width: Screen.width
+    height: Screen.height
+	padding: config.ScreenPadding
+	focus: true
 
     LayoutMirroring.enabled: config.ForceRightToLeft == "true" ? true : Qt.application.layoutDirection === Qt.RightToLeft
     LayoutMirroring.childrenInherit: true
 
-    padding: config.ScreenPadding
-    palette.button: "transparent"
-    palette.highlight: config.AccentColor
-    palette.text: config.MainColor
-    palette.buttonText: config.MainColor
-    palette.window: config.BackgroundColor
+	// BACKGROUND
 
-    font.family: config.Font
-    font.pointSize: config.FontSize !== "" ? config.FontSize : parseInt(height / 80)
-    focus: true
+	background: Rectangle {
+		id: background
 
-    property bool leftleft: config.HaveFormBackground == "true" &&
-                            config.PartialBlur == "false" &&
-                            config.FormPosition == "left" &&
-                            config.BackgroundImageHAlignment == "left"
+		anchors.fill: parent
+		color: backColor
 
-    property bool leftcenter: config.HaveFormBackground == "true" &&
-                              config.PartialBlur == "false" &&
-                              config.FormPosition == "left" &&
-                              config.BackgroundImageHAlignment == "center"
+		ShadowedRectangle {
+			anchors.fill: parent
+			corners.topRightRadius: 14
+			corners.bottomRightRadius: 14
+			color: config.AccentColor
+			visible: false
+		}
+	}
 
-    property bool rightright: config.HaveFormBackground == "true" &&
-                              config.PartialBlur == "false" &&
-                              config.FormPosition == "right" &&
-                              config.BackgroundImageHAlignment == "right"
+	// VIRTUAL KEYBOARD
 
-    property bool rightcenter: config.HaveFormBackground == "true" &&
-                               config.PartialBlur == "false" &&
-                               config.FormPosition == "right" &&
-                               config.BackgroundImageHAlignment == "center"
+	InputPanel {
+		id: inputPanel
+		anchors.bottom: parent.bottom
+		anchors.horizontalCenter: parent.horizontalCenter
+		width: parent.width / 2
+		visible: false
+		z: 1
+	}
 
-    Item {
-        id: sizeHelper
+	// BANNER
 
-        anchors.fill: parent
-        height: parent.height
-        width: parent.width
+	StackView {
+		id: stack
 
-        Rectangle {
-            id: tintLayer
-            anchors.fill: parent
-            width: parent.width
-            height: parent.height
-            color: "black"
-            opacity: config.DimBackgroundImage
-            z: 1
-        }
+		//anchors.left: parent.left
+		anchors.top: parent.top
+		anchors.bottom: parent.bottom
 
-        Rectangle {
-            id: formBackground
-            anchors.fill: form
-            anchors.centerIn: form
-            color: root.palette.window
-            visible: config.HaveFormBackground == "true" ? true : false
-            opacity: config.PartialBlur == "true" ? 0.3 : 1
-            z: 1
-        }
+		x: -50
+		opacity: 0
 
-        LoginForm {
-            id: form
+		width: parent.width - parent.width * (100 - bannerWidth) / 100
+		height: parent.height
 
-            height: virtualKeyboard.state == "visible" ? parent.height - virtualKeyboard.implicitHeight : parent.height
-            width: parent.width / 2.5
-            anchors.horizontalCenter: config.FormPosition == "center" ? parent.horizontalCenter : undefined
-            anchors.left: config.FormPosition == "left" ? parent.left : undefined
-            anchors.right: config.FormPosition == "right" ? parent.right : undefined
-            virtualKeyboardActive: virtualKeyboard.state == "visible" ? true : false
-            z: 1
-        }
+		Behavior on opacity {
+			NumberAnimation { duration: 2000 ; easing.type: Easing.OutExpo }
+		}
 
-        Button {
-            id: vkb
-            onClicked: virtualKeyboard.switchState()
-            visible: virtualKeyboard.status == Loader.Ready && config.ForceHideVirtualKeyboardButton == "false"
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: implicitHeight
-            anchors.horizontalCenter: form.horizontalCenter
-            z: 1
-            contentItem: Text {
-                text: config.TranslateVirtualKeyboardButton || "Virtual Keyboard"
-                color: parent.visualFocus ? palette.highlight : palette.text
-                font.pointSize: root.font.pointSize * 0.8
-            }
-            background: Rectangle {
-                id: vkbbg
-                color: "transparent"
-            }
-        }
+		Behavior on x {
+			NumberAnimation { duration: 2000 ; easing.type: Easing.OutExpo }
+		}
 
-        Loader {
-            id: virtualKeyboard
-            source: "Components/VirtualKeyboard.qml"
-            state: "hidden"
-            property bool keyboardActive: item ? item.active : false
-            onKeyboardActiveChanged: keyboardActive ? state = "visible" : state = "hidden"
-            width: parent.width
-            z: 1
-            function switchState() { state = state == "hidden" ? "visible" : "hidden" }
-            states: [
-                State {
-                    name: "visible"
-                    PropertyChanges {
-                        target: form
-                        systemButtonVisibility: false
-                        clockVisibility: false
-                    }
-                    PropertyChanges {
-                        target: virtualKeyboard
-                        y: root.height - virtualKeyboard.height
-                        opacity: 1
-                    }
-                },
-                State {
-                    name: "hidden"
-                    PropertyChanges {
-                        target: virtualKeyboard
-                        y: root.height - root.height/4
-                        opacity: 0
-                    }
-                }
-            ]
-            transitions: [
-                Transition {
-                    from: "hidden"
-                    to: "visible"
-                    SequentialAnimation {
-                        ScriptAction {
-                            script: {
-                                virtualKeyboard.item.activated = true;
-                                Qt.inputMethod.show();
-                            }
-                        }
-                        ParallelAnimation {
-                            NumberAnimation {
-                                target: virtualKeyboard
-                                property: "y"
-                                duration: 100
-                                easing.type: Easing.OutQuad
-                            }
-                            OpacityAnimator {
-                                target: virtualKeyboard
-                                duration: 100
-                                easing.type: Easing.OutQuad
-                            }
-                        }
-                    }
-                },
-                Transition {
-                    from: "visible"
-                    to: "hidden"
-                    SequentialAnimation {
-                        ParallelAnimation {
-                            NumberAnimation {
-                                target: virtualKeyboard
-                                property: "y"
-                                duration: 100
-                                easing.type: Easing.InQuad
-                            }
-                            OpacityAnimator {
-                                target: virtualKeyboard
-                                duration: 100
-                                easing.type: Easing.InQuad
-                            }
-                        }
-                        ScriptAction {
-                            script: {
-                                Qt.inputMethod.hide();
-                            }
-                        }
-                    }
-                }
-            ]
-        }
+		Behavior on scale {
+			NumberAnimation { duration: 2000 ; easing.type: Easing.OutExpo }
+		}
 
-        Image {
-            id: backgroundImage
+		Behavior on width {
+			NumberAnimation { duration: 2000 ; easing.type: Easing.OutExpo }
+		}
 
-            height: parent.height
-            width: config.HaveFormBackground == "true" && config.FormPosition != "center" && config.PartialBlur != "true" ? parent.width - formBackground.width : parent.width
-            anchors.left: leftleft ||
-                          leftcenter ?
-                                formBackground.right : undefined
+		background: Rectangle {
+			anchors.fill: parent
+			color: config.AccentColor
+		}
 
-            anchors.right: rightright ||
-                           rightcenter ?
-                                formBackground.left : undefined
+		pushEnter: Transition {
+			PropertyAnimation {
+				property: "opacity"
+				from: 0
+				to: 1
+				duration: 1000
+				easing.type: Easing.OutExpo
+			}
+		}
 
-            horizontalAlignment: config.BackgroundImageHAlignment == "left" ?
-                                 Image.AlignLeft :
-                                 config.BackgroundImageHAlignment == "right" ?
-                                 Image.AlignRight : Image.AlignHCenter
+		pushExit: Transition {
+			PropertyAnimation {
+				property: "opacity"
+				from: 1
+				to: 0
+				duration: 1000
+			}
+		}
 
-            verticalAlignment: config.BackgroundImageVAlignment == "top" ?
-                               Image.AlignTop :
-                               config.BackgroundImageVAlignment == "bottom" ?
-                               Image.AlignBottom : Image.AlignVCenter
+		popEnter: Transition {
+			PropertyAnimation {
+				property: "opacity"
+				from: 0
+				to: 1
+				duration: 1000
+			}
+		}
 
-            source: config.background || config.Background
-            fillMode: config.ScaleImageCropped == "true" ? Image.PreserveAspectCrop : Image.PreserveAspectFit
-            asynchronous: true
-            cache: true
-            clip: true
-            mipmap: true
-        }
+		popExit: Transition {
+			PropertyAnimation {
+				property: "opacity"
+				from: 1
+				to: 0
+				duration: 1000
+			}
+		}
 
-        MouseArea {
-            anchors.fill: backgroundImage
-            onClicked: parent.forceActiveFocus()
-        }
+		Component.onCompleted: {
+			x = 0
+			opacity = 1
+			stack.push("Components/Banner.qml")
+		}
+	}
 
-        ShaderEffectSource {
-            id: blurMask
+	// PAGES
 
-            sourceItem: backgroundImage
-            width: form.width
-            height: parent.height
-            anchors.centerIn: form
-            sourceRect: Qt.rect(x,y,width,height)
-            visible: config.FullBlur == "true" || config.PartialBlur == "true" ? true : false
-        }
+	Page {
+		id: pages
 
-        GaussianBlur {
-            id: blur
+		anchors.left: stack.right
+		anchors.right: parent.right
+		anchors.top: parent.top
+		anchors.bottom: parent.bottom
 
-            height: parent.height
-            width: config.FullBlur == "true" ? parent.width : form.width
-            source: config.FullBlur == "true" ? backgroundImage : blurMask
-            radius: config.BlurRadius
-            samples: config.BlurRadius * 2 + 1
-            cached: true
-            anchors.centerIn: config.FullBlur == "true" ? parent : form
-            visible: config.FullBlur == "true" || config.PartialBlur == "true" ? true : false
-        }
-    }
+		padding: 0
+
+		background: ShadowedRectangle {
+			anchors.fill: parent
+			corners.topRightRadius: 12
+			corners.bottomRightRadius: 12
+			color: config.AccentColor
+		}
+
+		Component.onCompleted: {
+			stackView.push("Components/Users.qml")
+		}
+
+		StackView {
+			id: stackView
+			anchors.fill: parent
+			clip: true
+
+			pushEnter: Transition {
+				PropertyAnimation {
+					property: "opacity"
+					from: 0
+					to: 1
+					duration: 2000
+					easing.type: Easing.OutExpo
+				}
+				PropertyAnimation {
+					property: "x"
+					from: -20
+					to: 0
+					duration: 2000
+					easing.type: Easing.OutExpo
+				}
+			}
+
+			pushExit: Transition {
+				PropertyAnimation {
+					property: "opacity"
+					from: 1
+					to: 0
+					duration: 2000
+					easing.type: Easing.OutExpo
+				}
+			}
+
+			popEnter: Transition {
+				PropertyAnimation {
+					property: "opacity"
+					from: 0
+					to: 1
+					duration: 2000
+					easing.type: Easing.OutExpo
+				}
+			}
+
+			popExit: Transition {
+				PropertyAnimation {
+					property: "opacity"
+					from: 1
+					to: 0
+					duration: 2000
+					easing.type: Easing.OutExpo
+				}
+			}
+		}
+	}
 }

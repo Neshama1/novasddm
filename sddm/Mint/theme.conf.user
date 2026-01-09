@@ -1,3 +1,4 @@
 [General]
-background=Mint Dark - 5K.jpg
+
+background="Backgrounds/Mint Dark.jpg"
 type=image
