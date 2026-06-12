@@ -124,6 +124,8 @@ Page {
                 	leftPadding: 15
 					echoMode: TextInput.Password
 
+					onEditingFinished: Qt.inputMethod.hide()
+
 					onAccepted: {
 						password = text
 						sddm.login(user, password, sessionIndex)

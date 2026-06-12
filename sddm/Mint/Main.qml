@@ -73,6 +73,7 @@ Page {
 
 	// VIRTUAL KEYBOARD
 
+	/*
 	InputPanel {
 		id: inputPanel
 		anchors.bottom: parent.bottom
@@ -81,6 +82,7 @@ Page {
 		visible: false
 		z: 1
 	}
+	*/
 
 	// BANNER
 
